@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<h:head>
+	<style type="text/css">
+/* Custom styles for the Timeline */
+.datalist-noborder .ui-datalist-content {
+	border: none;
+}
+
+div {
+	font-size: 12px;
+}
+
+div.timeline-frame {
+	border-color: #00b1a9;
+	/*border-radius: 5px;*/
+}
+
+div.timeline-axis {
+	border-color: #00b1a9;
+	background-color: #00b1a9;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00b1a9',
+		endColorstr='#00b1a9') alpha(opacity = 100);
+	background: -webkit-gradient(linear, left top, left bottom, from(#00b1a9),
+		to(#00b1a9));
+	background: -moz-linear-gradient(top, #00b1a9, #00b1a9);
+	-khtml-opacity: 1;
+	-moz-opacity: 1;
+	opacity: 1;
+}
+
+div.timeline-groups-axis {
+	border-color: #00b1a9;
+}
+
+div.timeline-groups-axis-onleft {
+	border-style: none solid none none;
+}
+
+div.timeline-axis-text {
+	color: white;
+}
+
+div.timeline-event {
+	color: white !important;
+	border-radius: none !important;
+}
+
+div.timeline-event-content {
+	padding: none;
+	text-shadow: none;
+}
+
+div.unavailable {
+	background: #000 none !important; /* black */
+	border-color: #000 !important; /* black */
+}
+
+div.sk_dev {
+	background: #7030a0 none !important; /* purple */
+	border-color: #7030a0 !important; /* purple */
+}
+
+div.sb_dev {
+	background: #d0cece none !important; /* purple */
+	border-color: #d0cece !important; /* purple */
+}
+
+div.pm_dev {
+	background: #00b0f0 none !important; /* blue */
+	border-color: #00b0f0 !important; /* blue */
+}
+
+div.exp {
+	background: #00b050 none !important; /* green */
+	border-color: #00b050 !important; /* green */
+}
+
+div.timeline-event-selected {
+	background: #BECEFE none !important;
+	border-color: #97B0F8 !important;
+}
+</style>
+</h:head>
+<h:body>
+	<h:inputHidden value="#{rigPlanBean.loadPage()}" />
+	<div>
+		<h:panelGroup style="text-align: center;">
+			<h3>WELLS WORKING STDS (MALAYSIA) - FOR PLANNING RESOURCES,
+				EQUIPMENTS AND MATERIALS</h3>
+		</h:panelGroup>
+		<h:panelGroup>
+			<p:fieldset legend="Filter" style="margin-bottom:20px">
+				<h:form id="search">
+					<h:panelGrid columns="9" cellpadding="5" width="100%">
+						<h:outputText value="Rig Type: " />
+						<p:selectOneMenu value="#{rigPlanBean.rigType}" style="width:70%">
+							<f:selectItem itemLabel="ALL" itemValue="SELECT" />
+							<f:selectItem itemLabel="JACK UP" itemValue="JACK UP" />
+							<f:selectItem itemLabel="TENDER ASSISTED"
+								itemValue="TENDER ASSISTED" />
+						</p:selectOneMenu>
+						<h:outputText value="Well Type: " />
+						<p:selectOneMenu value="#{rigPlanBean.wellType}" style="width:70%">
+							<f:selectItem itemLabel="ALL" itemValue="SELECT" />
+							<f:selectItem itemLabel="DEV" itemValue="DEV" />
+							<f:selectItem itemLabel="EXP" itemValue="EXP" />
+						</p:selectOneMenu>
+						<h:outputText value="Block: " />
+						<p:selectOneMenu value="#{rigPlanBean.block}" style="width:70%">
+							<f:selectItem itemLabel="ALL" itemValue="SELECT" />
+							<f:selectItem itemLabel="SK" itemValue="SK" />
+							<f:selectItem itemLabel="SB" itemValue="SB" />
+							<f:selectItem itemLabel="PM" itemValue="PM" />
+						</p:selectOneMenu>
+						<h:outputText value="Status: " />
+						<p:selectOneMenu value="#{rigPlanBean.status}" style="width:70%">
+							<f:selectItem itemLabel="ALL" itemValue="SELECT" />
+							<f:selectItem itemLabel="COMPLETED" itemValue="COMPLETED" />
+							<f:selectItem itemLabel="ONGOING" itemValue="ONGOING" />
+						</p:selectOneMenu>
+						<p:commandButton value="Search" immediate="false"
+							actionListener="#{rigPlanBean.searchRigPlan(rigPlanBean.rigType,rigPlanBean.wellType,rigPlanBean.block,rigPlanBean.status)}"
+							update=":timelineGroup" process=":search">
+						</p:commandButton>
+					</h:panelGrid>
+
+				</h:form>
+			</p:fieldset>
+		</h:panelGroup>
+	</div>
+&nbsp;
+	
+	<h:panelGroup id="timelineGroup">
+		<c:set var="roles1" value="admin" />
+		<c:set var="roles2" value="drilling engineer" />
+		<h:form id="form">
+			<c:if
+				test="#{not empty user and sessionScope.user.user_roles eq roles1}">
+
+
+				<div class="datalist-noborder">
+
+					<p:dataList id="tbl" value="#{rigPlanBean.mainTimelineObj}"
+						var="contractType" type="definition">
+						<br></br>
+				<p:column>
+							<p:fieldset legend="#{contractType.contract}">
+								<p:dataList value="#{contractType.rigLine}" var="rigByType"
+									type="definition">
+									<p:fieldset legend="#{rigByType.rigtype}" toggleable="true"
+										toggleSpeed="500">
+											
+										<p:timeline value="#{rigByType.model}" var="rigPlan"
+											editable="true" eventMargin="10" eventMarginAxis="0"
+											start="#{rigPlanBean.start}" end="#{rigPlanBean.end}"
+											showNavigation="false" showButtonNew="true" axisOnTop="true"
+											stackEvents="false">
+											<h:outputText value="#{rigPlan.objname}" />
+											<p:ajax event="select" listener="#{rigPlanBean.onSelect}"
+												process="@this" oncomplete="PF('updateDialog').show()"
+												update=":form:dialogId" />
+											<p:ajax event="add" update=":form:dialogId"
+												listener="#{rigPlanBean.onAdd}"
+												oncomplete="PF('updateDialog').show()" />
+
+										</p:timeline>
+										
+									</p:fieldset>
+						&nbsp;
+					</p:dataList>
+							</p:fieldset>
+								
+					&nbsp;
+					<br></br>
+					</p:column>
+					</p:dataList>
+
+				</div>
+
+				<p:dialog id="dialogId" widgetVar="updateDialog" header="Edit"
+					resizable="false" width="300" showEffect="explode"
+					hideEffect="explode">
+					<h:panelGrid id="display" columns="2" cellpadding="4">
+						<h:outputText value="Rig Type: " />
+						<p:selectOneMenu value="#{rigPlanBean.rigPlanObj.rig_typ}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="true">
+							<f:selectItem itemLabel="JACK UP" itemValue="JACK UP" />
+							<f:selectItem itemLabel="TENDER ASSISTED"
+								itemValue="TENDER ASSISTED" />
+						</p:selectOneMenu>
+						<h:outputText value="Rig Name: " />
+						<p:selectOneMenu value="#{rigPlanBean.rigPlanObj.rig_name}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="true">
+							<f:selectItem itemLabel="J/U NAGA 6" itemValue="J/U NAGA 6" />
+							<f:selectItem itemLabel="J/U TBA 1" itemValue="J/U TBA 1" />
+							<f:selectItem itemLabel="TADR - T9" itemValue="TADR - T9" />
+						</p:selectOneMenu>
+						<h:outputText value="Well Name: " />
+						<p:inputText value="#{rigPlanBean.rigPlanObj.well_name}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="true"
+							label="Well Name" />
+						<h:outputText value="Well Type: " />
+						<p:selectOneMenu value="#{rigPlanBean.rigPlanObj.well_typ}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="true">
+							<f:selectItem itemLabel="DEV" itemValue="DEV" />
+							<f:selectItem itemLabel="EXP" itemValue="EXP" />
+						</p:selectOneMenu>
+						<h:outputText value="Operator: " />
+						<p:inputText value="#{rigPlanBean.rigPlanObj.pac}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="true"
+							label="Operator" />
+						<h:outputText value="Block: " />
+						<p:selectOneMenu value="#{rigPlanBean.rigPlanObj.block}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="true">
+							<f:selectItem itemLabel="SK" itemValue="SK" />
+							<f:selectItem itemLabel="SB" itemValue="SB" />
+							<f:selectItem itemLabel="PM" itemValue="PM" />
+						</p:selectOneMenu>
+						<h:outputText value="Status: " />
+						<p:selectOneMenu value="#{rigPlanBean.rigPlanObj.status}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="true">
+							<f:selectItem itemLabel="COMPLETED" itemValue="COMPLETED" />
+							<f:selectItem itemLabel="ONGOING" itemValue="ONGOING" />
+						</p:selectOneMenu>
+						<h:outputText value="Planned Days: " />
+						<p:inputText value="#{rigPlanBean.rigPlanObj.plan_days}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="false"
+							label="Planned Days" />
+						<h:outputText value="Actual Days: " />
+						<p:inputText value="#{rigPlanBean.rigPlanObj.actual_days}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="false"
+							label="Actual Days" />
+						<h:outputText value="Rig Up" />
+						<p:calendar value="#{rigPlanBean.rigPlanObj.rig_up}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}"
+							pattern="dd/MM/yyyy HH:mm" required="false" label="Rig Up" />
+						<h:outputText value="Rig Down" />
+						<p:calendar value="#{rigPlanBean.rigPlanObj.rig_down}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}"
+							pattern="dd/MM/yyyy HH:mm" required="false" label="Rig Down" />
+						<h:outputText value="Start Date" />
+						<p:calendar value="#{rigPlanBean.rigPlanObj.start_date}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}"
+							pattern="dd/MM/yyyy HH:mm" required="false" label="Start Date" />
+						<h:outputText value="End Date" />
+						<p:calendar value="#{rigPlanBean.rigPlanObj.end_date}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}"
+							pattern="dd/MM/yyyy HH:mm" required="false" label="End Date" />
+						<h:outputText value="Contract Status: " />
+						<p:selectOneMenu value="#{rigPlanBean.rigPlanObj.contract_stat}"
+							rendered="#{not empty rigPlanBean.rigPlanObj}" required="true">
+							<f:selectItem itemLabel="SIGNED" itemValue="SIGNED" />
+							<f:selectItem itemLabel="NO" itemValue="NO" />
+						</p:selectOneMenu>
+					</h:panelGrid>
+
+					<f:facet name="footer">
+						<h:panelGroup layout="block"
+							style="text-align:right; padding:2px; white-space:nowrap;">
+							<h:commandButton value="Save"
+								action="#{rigPlanBean.saveRigPlan()}" update=":timelineGroup"
+								process="@form"
+								oncomplete="if(!args.validationFailed){PF('updateDialog').hide();}" />
+							<h:commandButton type="button" value="Close"
+								onclick="PF('updateDialog').hide()" />
+						</h:panelGroup>
+					</f:facet>
+				</p:dialog>
+			</c:if>
+		</h:form>
+
+		<h:form id="form1">
+			<c:if
+				test="#{not empty user and sessionScope.user.user_roles eq roles2}">
+				<div class="datalist-noborder">
+					<p:dataList value="#{rigPlanBean.mainTimelineObj}"
+						var="contractType" type="definition">
+						<p:fieldset legend="#{contractType.contract}">
+							<p:dataList value="#{contractType.rigLine}" var="rigByType"
+								type="definition">
+								<p:fieldset legend="#{rigByType.rigtype}" toggleable="true"
+									toggleSpeed="500">
+									<p:timeline value="#{rigByType.model}" var="rigPlan"
+										editable="true" eventMargin="10" eventMarginAxis="0"
+										start="#{rigPlanBean.start}" end="#{rigPlanBean.end}"
+										showNavigation="false" showButtonNew="false" axisOnTop="true"
+										stackEvents="false">
+										<h:outputText value="#{rigPlan.objname}" />
+										<p:ajax event="select" listener="#{rigPlanBean.onSelect}"
+											process="@this" oncomplete="PF('viewDialog').show()"
+											update=":form1:viewDialogId" />
+									</p:timeline>
+								</p:fieldset>
+						&nbsp;
+					</p:dataList>
+						</p:fieldset>
+					&nbsp;
+					</p:dataList>
+				</div>
+
+				<p:dialog id="viewDialogId" widgetVar="viewDialog" header="View"
+					resizable="false" width="400" showEffect="explode"
+					hideEffect="explode">
+					<h:panelGrid id="display" columns="2" cellpadding="4">
+						<h:outputText value="Rig Type: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.rig_typ}" />
+						<h:outputText value="Rig Name: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.rig_name}" />
+						<h:outputText value="Well Name: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.well_name}" />
+						<h:outputText value="Well Type: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.well_typ}" />
+						<h:outputText value="Operator: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.pac}" />
+						<h:outputText value="Block: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.block}" />
+						<h:outputText value="Status: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.status}" />
+						<h:outputText value="Planned Days: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.plan_days}" />
+						<h:outputText value="Actual Days: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.actual_days}" />
+						<h:outputText value="Rig Up: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.rig_up}" />
+						<h:outputText value="Rig Down: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.rig_down}" />
+						<h:outputText value="Start Date: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.start_date}" />
+						<h:outputText value="End Date: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.end_date}" />
+						<h:outputText value="Contract Status: " />
+						<h:outputText value="#{rigPlanBean.rigPlanObj.contract_stat}" />
+					</h:panelGrid>
+
+					<f:facet name="footer">
+						<h:panelGroup layout="block"
+							style="text-align:right; padding:2px; white-space:nowrap;">
+
+							<p:commandButton type="button" value="Close"
+								onclick="PF('viewDialog').hide()" />
+						</h:panelGroup>
+					</f:facet>
+				</p:dialog>
+			</c:if>
+		</h:form>
+		<h:panelGroup style="text-align:center;">
+			<h:form id="logout">
+				<h:commandLink target="_parent" action="#{userBean.logout()}">
+					<span>Logout</span>
+				</h:commandLink>
+			</h:form>
+		</h:panelGroup>
+	</h:panelGroup>
+</h:body>
+
+</html>
